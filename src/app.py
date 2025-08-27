@@ -26,8 +26,12 @@ class App:
         self.__router.add_api_route("/create/user", self.create_user, methods=["POST"])
         self.__router.add_api_route("/save/model", self.save_model, methods=["POST"])
         self.__router.add_api_route("/save/audio", self.save_audio, methods=["POST"])
-        self.__router.add_api_route("/{userID}/model", self.get_model, methods=["POST"])
-        self.__router.add_api_route("/{userID}/audio", self.get_audio, methods=["POST"])
+        self.__router.add_api_route(
+            "/{user_id}/model", self.get_model, methods=["POST"]
+        )
+        self.__router.add_api_route(
+            "/{user_id}/audio", self.get_audio, methods=["POST"]
+        )
 
     def get_app(self) -> FastAPI:
         self.__app.include_router(self.__router)
@@ -37,7 +41,7 @@ class App:
     async def root(self) -> JSONResponse:
         return {"message": "This is a database server for YummyVerse project."}
 
-    # /{userID}/status
+    # /{user_id}/status
     async def data_status(self, user_id: str = Form(...)) -> JSONResponse:
         uuid = UUID(user_id)
         return {"user_id": str(uuid), "status": self.__db.is_ready(uuid)}
@@ -78,7 +82,7 @@ class App:
         self.__db.load_audio(uuid, file)
         return {"message": f"Audio file for user {uuid} saved successfully."}
 
-    # /{userID}/model
+    # /{user_id}/model
     async def get_model(self, user_id: str = Form(...)) -> FileResponse:
         uuid = UUID(user_id)
         model_path = ""
@@ -101,7 +105,7 @@ class App:
             filename=os.path.basename(model_path),
         )
 
-    # /{userID}/audio
+    # /{user_id}/audio
     async def get_audio(self, user_id: str = Form(...)) -> FileResponse:
         uuid = UUID(user_id)
         audio_path = ""
