@@ -1,0 +1,56 @@
+from fastapi import File
+from uuid import UUID
+import os
+import shutil
+
+
+class UserData:
+    MODEL_FILE = "model.glb"
+    AUDIO_FILE = "audio.wav"
+
+    def __init__(self, user_id: UUID, db_path: str):
+        self.__db_path = db_path
+        self.__uuid = user_id
+        self.__model_path = os.path.join(self.get_user_path(), UserData.MODEL_FILE)
+        self.__audio_path = os.path.join(self.get_user_path(), UserData.AUDIO_FILE)
+        self.__status = {
+            UserData.MODEL_FILE: False,
+            UserData.AUDIO_FILE: False,
+        }
+
+        os.makedirs(self.get_user_path(), exist_ok=True)
+
+    def get_uuid(self) -> UUID:
+        return self.__uuid
+
+    def get_user_path(self) -> str:
+        return os.path.join(self.__db_path, str(self.__uuid))
+
+    def get_model_path(self) -> str:
+        return self.__model_path if os.path.exists(self.__model_path) else ""
+
+    def get_audio_path(self) -> str:
+        return self.__audio_path if os.path.exists(self.__audio_path) else ""
+
+    def set_status(self, file_type: str, status: bool) -> None:
+        if file_type in self.__status.keys():
+            self.__status[file_type] = status
+
+    def is_ready(self) -> bool:
+        return all(self.__status.values())
+
+    def load_model(self, model_data: File) -> None:
+        self.__status[UserData.MODEL_FILE] = True
+        if os.path.exists(self.__model_path):
+            os.remove(self.__model_path)
+
+        with open(self.__model_path, "wb") as f:
+            shutil.copyfileobj(model_data.file, f)
+
+    def load_audio(self, audio_data: File) -> None:
+        self.__status[UserData.AUDIO_FILE] = True
+        if os.path.exists(self.__audio_path):
+            os.remove(self.__audio_path)
+
+        with open(self.__audio_path, "wb") as f:
+            shutil.copyfileobj(audio_data.file, f)
