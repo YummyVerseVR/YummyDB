@@ -4,7 +4,6 @@ from uuid import UUID
 import os
 
 from db.controller import DataBase
-from db.model import UserData
 
 
 class App:
