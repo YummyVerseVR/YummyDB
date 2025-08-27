@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, Body, UploadFile, File
+from fastapi import FastAPI, APIRouter, Form, UploadFile, File
 from fastapi.responses import FileResponse, JSONResponse
 from uuid import UUID
 import os
@@ -42,7 +42,7 @@ class App:
         return {"user_id": str(uuid), "status": self.__db.is_ready(uuid)}
 
     # /create/user
-    async def create_user(self, user_id: str = Body(...)) -> JSONResponse:
+    async def create_user(self, user_id: str = Form(...)) -> JSONResponse:
         uuid = UUID(user_id)
         self.__db.add_user(uuid)
         return {"message": f"User {uuid} created successfully."}
@@ -50,7 +50,7 @@ class App:
     # /save/model
     async def save_model(
         self,
-        user_id: str = Body(...),
+        user_id: str = Form(...),
         file: UploadFile = File(...),
     ) -> JSONResponse:
         uuid = UUID(user_id)
@@ -65,7 +65,7 @@ class App:
     # /save/audio
     async def save_audio(
         self,
-        user_id: str = Body(...),
+        user_id: str = Form(...),
         file: UploadFile = File(...),
     ) -> JSONResponse:
         uuid = UUID(user_id)
