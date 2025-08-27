@@ -20,7 +20,7 @@ class App:
         self.__router.add_api_route("/", self.root, methods=["GET"])
 
         self.__router.add_api_route(
-            "/{userID}/status", self.data_status, methods=["POST"]
+            "/{userID}/status", self.data_status, methods=["GET"]
         )
         self.__router.add_api_route("/create/user", self.create_user, methods=["POST"])
         self.__router.add_api_route("/save/model", self.save_model, methods=["POST"])
@@ -37,7 +37,7 @@ class App:
         return {"message": "This is a database server for YummyVerse project."}
 
     # /{user_id}/status
-    async def data_status(self, user_id: str = Form(...)) -> JSONResponse:
+    async def data_status(self, user_id: str) -> JSONResponse:
         uuid = UUID(user_id)
         return {"user_id": str(uuid), "status": self.__db.is_ready(uuid)}
 
