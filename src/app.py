@@ -25,12 +25,8 @@ class App:
         self.__router.add_api_route("/create/user", self.create_user, methods=["POST"])
         self.__router.add_api_route("/save/model", self.save_model, methods=["POST"])
         self.__router.add_api_route("/save/audio", self.save_audio, methods=["POST"])
-        self.__router.add_api_route(
-            "/{user_id}/model", self.get_model, methods=["POST"]
-        )
-        self.__router.add_api_route(
-            "/{user_id}/audio", self.get_audio, methods=["POST"]
-        )
+        self.__router.add_api_route("/{user_id}/model", self.get_model, methods=["GET"])
+        self.__router.add_api_route("/{user_id}/audio", self.get_audio, methods=["GET"])
 
     def get_app(self) -> FastAPI:
         self.__app.include_router(self.__router)
@@ -82,7 +78,7 @@ class App:
         return {"message": f"Audio file for user {uuid} saved successfully."}
 
     # /{user_id}/model
-    async def get_model(self, user_id: str = Form(...)) -> FileResponse:
+    async def get_model(self, user_id: str) -> FileResponse:
         uuid = UUID(user_id)
         model_path = ""
         if (userdata := self.__db.get_user(uuid)) is not None:
@@ -105,7 +101,7 @@ class App:
         )
 
     # /{user_id}/audio
-    async def get_audio(self, user_id: str = Form(...)) -> FileResponse:
+    async def get_audio(self, user_id: str) -> FileResponse:
         uuid = UUID(user_id)
         audio_path = ""
         if (userdata := self.__db.get_user(uuid)) is not None:
