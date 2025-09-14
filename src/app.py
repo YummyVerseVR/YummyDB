@@ -2,15 +2,14 @@ from fastapi import FastAPI, APIRouter, Form, UploadFile, File
 from fastapi.responses import FileResponse, JSONResponse
 from uuid import UUID
 import os
+import requests
 
 from db.controller import DataBase
 
 
 class App:
-    DATABASE_PATH = os.path.join(os.getcwd(), "YummyDB")
-
-    def __init__(self):
-        self.__db = DataBase(App.DATABASE_PATH)
+    def __init__(self, db_path: str):
+        self.__db = DataBase(db_path)
         self.__app = FastAPI()
         self.__router = APIRouter()
 
@@ -28,24 +27,30 @@ class App:
         self.__router.add_api_route("/{user_id}/model", self.get_model, methods=["GET"])
         self.__router.add_api_route("/{user_id}/audio", self.get_audio, methods=["GET"])
 
+    def __send_notify(self, user_id: str) -> None:
+        body = {"uuid": user_id, "is_ready": True}
+        requests.post("http://localhost:8002/set-user-status", json=body)
+
     def get_app(self) -> FastAPI:
         self.__app.include_router(self.__router)
         return self.__app
 
     # /
     async def root(self) -> JSONResponse:
-        return {"message": "This is a database server for YummyVerse project."}
+        return JSONResponse(
+            {"message": "This is a database server for YummyVerse project."}
+        )
 
     # /{user_id}/status
     async def data_status(self, user_id: str) -> JSONResponse:
         uuid = UUID(user_id)
-        return {"user_id": str(uuid), "status": self.__db.is_ready(uuid)}
+        return JSONResponse({"user_id": str(uuid), "status": self.__db.is_ready(uuid)})
 
     # /create/user
     async def create_user(self, user_id: str = Form(...)) -> JSONResponse:
         uuid = UUID(user_id)
         self.__db.add_user(uuid)
-        return {"message": f"User {uuid} created successfully."}
+        return JSONResponse({"message": f"User {uuid} created successfully."})
 
     # /save/model
     async def save_model(
@@ -60,7 +65,13 @@ class App:
             )
 
         self.__db.load_model(uuid, file)
-        return {"message": f"Model file for user {uuid} saved successfully."}
+
+        if self.__db.is_ready(uuid):
+            self.__send_notify(str(uuid))
+
+        return JSONResponse(
+            {"message": f"Model file for user {uuid} saved successfully."}
+        )
 
     # /save/audio
     async def save_audio(
@@ -75,7 +86,13 @@ class App:
             )
 
         self.__db.load_audio(uuid, file)
-        return {"message": f"Audio file for user {uuid} saved successfully."}
+
+        if self.__db.is_ready(uuid):
+            self.__send_notify(str(uuid))
+
+        return JSONResponse(
+            {"message": f"Audio file for user {uuid} saved successfully."}
+        )
 
     # /{user_id}/model
     async def get_model(self, user_id: str) -> FileResponse:
