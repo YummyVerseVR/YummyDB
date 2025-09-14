@@ -8,11 +8,12 @@ from db.controller import DataBase
 
 
 class App:
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str, controller_endpoint: str):
         self.__db = DataBase(db_path)
         self.__app = FastAPI()
         self.__router = APIRouter()
 
+        self.__controller_endpoint = controller_endpoint
         self.__setup_routes()
 
     def __setup_routes(self):
@@ -29,7 +30,7 @@ class App:
 
     def __send_notify(self, user_id: str) -> None:
         body = {"uuid": user_id, "is_ready": True}
-        requests.post("http://localhost:8002/set-user-status", json=body)
+        requests.post(f"{self.__controller_endpoint}/set-user-status", json=body)
 
     def get_app(self) -> FastAPI:
         self.__app.include_router(self.__router)
@@ -101,15 +102,10 @@ class App:
         if (userdata := self.__db.get_user(uuid)) is not None:
             model_path = userdata.get_model_path()
         else:
-            return JSONResponse(
-                status_code=404, content={"message": f"User {uuid} not found."}
-            )
+            return FileResponse("./dummy.glb", status_code=404)
 
         if not model_path or not os.path.exists(model_path):
-            return JSONResponse(
-                status_code=404,
-                content={"message": f"Model file for user {uuid} not found."},
-            )
+            return FileResponse("./dummy.glb", status_code=404)
 
         return FileResponse(
             model_path,
@@ -124,15 +120,10 @@ class App:
         if (userdata := self.__db.get_user(uuid)) is not None:
             audio_path = userdata.get_audio_path()
         else:
-            return JSONResponse(
-                status_code=404, content={"message": f"User {uuid} not found."}
-            )
+            return FileResponse("./dummy.glb", status_code=404)
 
         if not audio_path or not os.path.exists(audio_path):
-            return JSONResponse(
-                status_code=404,
-                content={"message": f"Audio file for user {uuid} not found."},
-            )
+            return FileResponse("./dummy.glb", status_code=404)
 
         return FileResponse(
             audio_path, media_type="audio/wav", filename=os.path.basename(audio_path)
