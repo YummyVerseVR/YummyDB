@@ -56,7 +56,7 @@ class App:
             print(f"Notify {self.__device_endpoint}/notify: {body}")
             return JSONResponse({"message": f"Notification sent for user {user_id}."})
 
-        requests.post(f"{self.__device_endpoint}/notify", json=body)
+        # requests.post(f"{self.__device_endpoint}/notify", json=body)
 
         return JSONResponse({"message": f"Notification sent for user {user_id}."})
 
