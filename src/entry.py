@@ -5,23 +5,35 @@ from app import App
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-d", "--database-path", type=str, required=True, help="path to store data"
+        "-db", "--database-path", type=str, required=True, help="path to store data"
     )
     parser.add_argument(
-        "-e",
+        "-d",
+        "--device-server-endpoint",
+        type=str,
+        required=False,
+        default="http://localhost:9000",
+        help="endpoint of device server",
+    )
+    parser.add_argument(
+        "-c",
         "--control-server-endpoint",
         type=str,
-        required=True,
+        required=False,
+        default="http://localhost:8000",
         help="endpoint of control server",
     )
     parser.add_argument(
         "-p",
         "--port",
         type=int,
-        default=8000,
-        help="port to run the server on (default: 8000)",
+        default=8001,
+        help="port to run the server on (default: 8001)",
     )
+    parser.add_argument("--debug", action="store_true", help="enable debug mode")
     args = parser.parse_args()
 
-    app = App(args.database_path, args.control_server_endpoint)
+    app = App(
+        args.database_path, args.device_server_endpoint, args.control_server_endpoint
+    )
     uvicorn.run(app.get_app(), host="0.0.0.0", port=args.port, log_level="info")

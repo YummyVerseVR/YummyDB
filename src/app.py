@@ -8,17 +8,24 @@ from db.controller import DataBase
 
 
 class App:
-    def __init__(self, db_path: str, controller_endpoint: str):
+    def __init__(
+        self,
+        db_path: str,
+        device_endpoint: str,
+        controller_endpoint: str,
+        debug: bool = False,
+    ):
+        self.__debug = debug
         self.__db = DataBase(db_path)
         self.__app = FastAPI()
         self.__router = APIRouter()
 
+        self.__device_endpoint = device_endpoint
         self.__controller_endpoint = controller_endpoint
         self.__setup_routes()
 
     def __setup_routes(self):
-        self.__router.add_api_route("/", self.root, methods=["GET"])
-
+        self.__router.add_api_route("/notify/{user_id}", self.notify, methods=["POST"])
         self.__router.add_api_route(
             "/{userID}/status", self.data_status, methods=["GET"]
         )
@@ -30,17 +37,26 @@ class App:
 
     def __send_notify(self, user_id: str) -> None:
         body = {"uuid": user_id, "is_ready": True}
+
+        if self.__debug:
+            print(f"Notify {self.__controller_endpoint}/set-user-status: {body}")
+            return
+
         requests.post(f"{self.__controller_endpoint}/set-user-status", json=body)
 
     def get_app(self) -> FastAPI:
         self.__app.include_router(self.__router)
         return self.__app
 
-    # /
-    async def root(self) -> JSONResponse:
-        return JSONResponse(
-            {"message": "This is a database server for YummyVerse project."}
-        )
+    # /notify/{user_id}
+    async def notify(self, user_id: str) -> None:
+        body = {"uuid": user_id}
+
+        if self.__debug:
+            print(f"Notify {self.__device_endpoint}/notify: {body}")
+            return
+
+        requests.post(f"{self.__device_endpoint}/notify", json=body)
 
     # /{user_id}/status
     async def data_status(self, user_id: str) -> JSONResponse:
