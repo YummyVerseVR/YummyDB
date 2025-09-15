@@ -30,9 +30,11 @@ class App:
             "/{userID}/status", self.data_status, methods=["GET"]
         )
         self.__router.add_api_route("/create/user", self.create_user, methods=["POST"])
+        self.__router.add_api_route("/save/image", self.save_image, methods=["POST"])
         self.__router.add_api_route("/save/model", self.save_model, methods=["POST"])
         self.__router.add_api_route("/save/audio", self.save_audio, methods=["POST"])
         self.__router.add_api_route("/save/param", self.save_param, methods=["POST"])
+        self.__router.add_api_route("/{user_id}/image", self.get_image, methods=["GET"])
         self.__router.add_api_route("/{user_id}/model", self.get_model, methods=["GET"])
         self.__router.add_api_route("/{user_id}/audio", self.get_audio, methods=["GET"])
         self.__router.add_api_route("/{user_id}/param", self.get_param, methods=["GET"])
@@ -72,6 +74,27 @@ class App:
         uuid = UUID(user_id)
         self.__db.add_user(uuid)
         return JSONResponse({"message": f"User {uuid} created successfully."})
+
+    # /save/image
+    async def save_image(
+        self,
+        user_id: str = Form(...),
+        file: UploadFile = File(...),
+    ) -> JSONResponse:
+        uuid = UUID(user_id)
+        if not self.__db.is_exist(uuid):
+            return JSONResponse(
+                status_code=404, content={"message": f"User {uuid} not found."}
+            )
+
+        self.__db.load_image(uuid, file)
+
+        if self.__db.is_ready(uuid):
+            self.__send_notify(str(uuid))
+
+        return JSONResponse(
+            {"message": f"Image file for user {uuid} saved successfully."}
+        )
 
     # /save/model
     async def save_model(
@@ -134,6 +157,22 @@ class App:
 
         return JSONResponse(
             {"message": f"Param file for user {uuid} saved successfully."}
+        )
+
+    # /{user_id}/image
+    async def get_image(self, user_id: str) -> FileResponse:
+        uuid = UUID(user_id)
+        image_path = ""
+        if (userdata := self.__db.get_user(uuid)) is not None:
+            image_path = userdata.get_image_path()
+        else:
+            return FileResponse("./dummy.png", status_code=404)
+
+        if not image_path or not os.path.exists(image_path):
+            return FileResponse("./dummy.png", status_code=404)
+
+        return FileResponse(
+            image_path, media_type="image/png", filename=os.path.basename(image_path)
         )
 
     # /{user_id}/model

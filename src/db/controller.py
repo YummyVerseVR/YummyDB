@@ -22,6 +22,8 @@ class DataBase:
                 continue
 
         for user_id, user_data in self.__tables.items():
+            if os.path.exists(user_data.get_image_path()):
+                user_data.set_status(UserData.IMAGE_FILE, True)
             if os.path.exists(user_data.get_model_path()):
                 user_data.set_status(UserData.MODEL_FILE, True)
             if os.path.exists(user_data.get_audio_path()):
@@ -51,6 +53,12 @@ class DataBase:
         user_data = UserData(user_id, self.__db_path)
 
         self.__tables[user_id] = user_data
+
+    def load_image(self, user_id: UUID, image_data: Any) -> None:
+        if user_id not in self.__tables.keys():
+            raise ValueError(f"User {user_id} not found in database.")
+
+        self.__tables[user_id].load_image(image_data)
 
     def load_model(self, user_id: UUID, model_data: Any) -> None:
         if user_id not in self.__tables.keys():
