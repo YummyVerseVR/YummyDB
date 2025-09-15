@@ -26,6 +26,8 @@ class DataBase:
                 user_data.set_status(UserData.MODEL_FILE, True)
             if os.path.exists(user_data.get_audio_path()):
                 user_data.set_status(UserData.AUDIO_FILE, True)
+            if os.path.exists(user_data.get_param_path()):
+                user_data.set_status(UserData.PARAM_FILE, True)
 
     def get_user(self, user_id: UUID) -> UserData | None:
         if user_id not in self.__tables.keys():
@@ -61,6 +63,12 @@ class DataBase:
             raise ValueError(f"User {user_id} not found in database.")
 
         self.__tables[user_id].load_audio(audio_data)
+
+    def load_param(self, user_id: UUID, param_data: Any) -> None:
+        if user_id not in self.__tables.keys():
+            raise ValueError(f"User {user_id} not found in database.")
+
+        self.__tables[user_id].load_param(param_data)
 
     def should_notify(self, user_id: UUID) -> bool:
         if user_id not in self.__tables.keys():
