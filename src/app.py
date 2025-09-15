@@ -25,7 +25,7 @@ class App:
         self.__setup_routes()
 
     def __setup_routes(self):
-        self.__router.add_api_route("/notify/{user_id}", self.notify, methods=["POST"])
+        self.__router.add_api_route("/notify/{user_id}", self.notify, methods=["GET"])
         self.__router.add_api_route(
             "/{userID}/status", self.data_status, methods=["GET"]
         )
@@ -49,14 +49,16 @@ class App:
         return self.__app
 
     # /notify/{user_id}
-    async def notify(self, user_id: str) -> None:
+    async def notify(self, user_id: str) -> JSONResponse:
         body = {"uuid": user_id}
 
         if self.__debug:
             print(f"Notify {self.__device_endpoint}/notify: {body}")
-            return
+            return JSONResponse({"message": f"Notification sent for user {user_id}."})
 
         requests.post(f"{self.__device_endpoint}/notify", json=body)
+
+        return JSONResponse({"message": f"Notification sent for user {user_id}."})
 
     # /{user_id}/status
     async def data_status(self, user_id: str) -> JSONResponse:
