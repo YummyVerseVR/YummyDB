@@ -16,7 +16,7 @@ parser.add_argument(
     "--control-server-endpoint",
     type=str,
     required=False,
-    default="http://192.168.11.129:8000",
+    default="http://192.168.11.101:8000",
     help="endpoint of control server",
 )
 parser.add_argument(
