@@ -8,23 +8,15 @@ parser.add_argument(
     "--database-path",
     type=str,
     required=False,
-    default="./DATABASE",
+    default="~/HDD",
     help="path to store data",
-)
-parser.add_argument(
-    "-d",
-    "--device-server-endpoint",
-    type=str,
-    required=False,
-    default="http://localhost:9000",
-    help="endpoint of device server",
 )
 parser.add_argument(
     "-c",
     "--control-server-endpoint",
     type=str,
     required=False,
-    default="http://localhost:8000",
+    default="http://192.168.11.129:8000",
     help="endpoint of control server",
 )
 parser.add_argument(
@@ -39,7 +31,6 @@ args = parser.parse_args()
 
 app = App(
     args.database_path,
-    args.device_server_endpoint,
     args.control_server_endpoint,
     args.debug,
 ).get_app()

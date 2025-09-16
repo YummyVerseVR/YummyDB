@@ -11,7 +11,6 @@ class App:
     def __init__(
         self,
         db_path: str,
-        device_endpoint: str,
         controller_endpoint: str,
         debug: bool = False,
     ):
@@ -20,7 +19,6 @@ class App:
         self.__app = FastAPI()
         self.__router = APIRouter()
 
-        self.__device_endpoint = device_endpoint
         self.__controller_endpoint = controller_endpoint
         self.__setup_routes()
 
@@ -54,15 +52,7 @@ class App:
 
     # /notify/{user_id}
     async def notify(self, user_id: str) -> JSONResponse:
-        body = {"uuid": user_id}
-
-        if self.__debug:
-            print(f"Notify {self.__device_endpoint}/notify: {body}")
-            return JSONResponse({"message": f"Notification sent for user {user_id}."})
-
-        # requests.post(f"{self.__device_endpoint}/notify", json=body)
-
-        return JSONResponse({"message": f"Notification sent for user {user_id}."})
+        return JSONResponse({"message": "This endpoint is deprecated."})
 
     # /{user_id}/status
     async def data_status(self, user_id: str) -> JSONResponse:
