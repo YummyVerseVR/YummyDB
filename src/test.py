@@ -1,10 +1,9 @@
 import requests
-import uuid
 
 
 def test():
-    data = {"uuid": str(uuid.uuid4()), "is_ready": True}
-    res = requests.post("http://localhost:8000/set-user-status", json=data)
+    data = {"uuid": "024381f3-9b86-41df-abbf-c264d0241c8d", "is_ready": True}
+    res = requests.post("http://192.168.11.101:8000/set-user-status", json=data)
     print(res.json())
 
 
