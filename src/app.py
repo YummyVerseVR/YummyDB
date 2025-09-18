@@ -66,6 +66,25 @@ class App:
         self.__db.add_user(uuid)
         return JSONResponse({"message": f"User {uuid} created successfully."})
 
+    # /save/qr
+    async def save_qr(
+        self,
+        user_id: str = Form(...),
+        file: UploadFile = File(...),
+    ) -> JSONResponse:
+        uuid = UUID(user_id)
+        if not self.__db.is_exist(uuid):
+            return JSONResponse(
+                status_code=404, content={"message": f"User {uuid} not found."}
+            )
+
+        self.__db.load_qr(uuid, file)
+
+        if self.__db.is_ready(uuid):
+            self.__send_notify(str(uuid))
+
+        return JSONResponse({"message": f"QR file for user {uuid} saved successfully."})
+
     # /save/image
     async def save_image(
         self,
@@ -148,6 +167,22 @@ class App:
 
         return JSONResponse(
             {"message": f"Param file for user {uuid} saved successfully."}
+        )
+
+    # /{user_id}/qr
+    async def get_qr(self, user_id: str) -> FileResponse:
+        uuid = UUID(user_id)
+        qr_path = ""
+        if (userdata := self.__db.get_user(uuid)) is not None:
+            qr_path = userdata.get_qr_path()
+        else:
+            return FileResponse("./dummy.png", status_code=404)
+
+        if not qr_path or not os.path.exists(qr_path):
+            return FileResponse("./dummy.png", status_code=404)
+
+        return FileResponse(
+            qr_path, media_type="image/png", filename=os.path.basename(qr_path)
         )
 
     # /{user_id}/image
