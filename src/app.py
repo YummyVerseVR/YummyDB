@@ -28,10 +28,12 @@ class App:
             "/{userID}/status", self.data_status, methods=["GET"]
         )
         self.__router.add_api_route("/create/user", self.create_user, methods=["POST"])
+        self.__router.add_api_route("/save/qr", self.save_qr, methods=["POST"])
         self.__router.add_api_route("/save/image", self.save_image, methods=["POST"])
         self.__router.add_api_route("/save/model", self.save_model, methods=["POST"])
         self.__router.add_api_route("/save/audio", self.save_audio, methods=["POST"])
         self.__router.add_api_route("/save/param", self.save_param, methods=["POST"])
+        self.__router.add_api_route("/{user_id}/qr", self.get_qr, methods=["GET"])
         self.__router.add_api_route("/{user_id}/image", self.get_image, methods=["GET"])
         self.__router.add_api_route("/{user_id}/model", self.get_model, methods=["GET"])
         self.__router.add_api_route("/{user_id}/audio", self.get_audio, methods=["GET"])
