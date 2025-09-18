@@ -36,6 +36,7 @@ class App:
         self.__router.add_api_route("/{user_id}/model", self.get_model, methods=["GET"])
         self.__router.add_api_route("/{user_id}/audio", self.get_audio, methods=["GET"])
         self.__router.add_api_route("/{user_id}/param", self.get_param, methods=["GET"])
+        self.__router.add_api_route("/ping", self.ping, methods=["GET"])
 
     def __send_notify(self, user_id: str) -> None:
         body = {"uuid": user_id, "is_ready": True}
@@ -51,7 +52,7 @@ class App:
         return self.__app
 
     # /notify/{user_id}
-    async def notify(self, user_id: str) -> JSONResponse:
+    async def notify(self, _: str) -> JSONResponse:
         return JSONResponse({"message": "This endpoint is deprecated."})
 
     # /{user_id}/status
@@ -216,3 +217,6 @@ class App:
             media_type="application/json",
             filename=os.path.basename(param_path),
         )
+
+    async def ping(self) -> JSONResponse:
+        return JSONResponse({"message": "pong"})
