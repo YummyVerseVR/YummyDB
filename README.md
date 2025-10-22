@@ -1,5 +1,8 @@
 # YummyVerse Database Server
 
+# This repositry is NO LONGER MAINTENANCED!!
+**このリポジトリの機能はYummyControlServerに統合されました**
+
 ## 概要
 このリポジトリはYummyVerse用のデータベースサーバのコードです.
 
@@ -75,3 +78,4 @@ APIを利用する場合は以下の手順に従ってください.
 - `/{user_id}/param`: パラメータデータの取得
     - メソッド: GET
     - 説明: 指定されたユーザーのパラメータデータを取得します
+~~
